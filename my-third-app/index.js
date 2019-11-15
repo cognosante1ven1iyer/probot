@@ -8,7 +8,7 @@ module.exports = app => {
 
   app.on('push', async context => {
     // Code was pushed to the repo, what should we do with it?
-    app.log(context)
+    app.log(context.github.repos)
   })
 
   // For more information on building apps:
