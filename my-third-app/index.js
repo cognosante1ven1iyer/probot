@@ -3,39 +3,7 @@
  * @param {import('probot').Application} app
  */
 
-var fs = require('fs');
-var await = require('await');
-const util = require('util');
-const jq = require('node-jq');
-var fs = require('fs');
-const homedir = require('os').homedir(); 
-const eol = require('os').EOL; 
 
-//Setting up the program
-var configInfo;
-var usernameS;
-var passwordS;
-//Config info is at ~/.gitHubExtract.config
-var data = fs.readFileSync(homedir + '/.gitHubExtract.config','utf8')
-var fileAsString = data.toString();
-configInfo = fileAsString.split("\n");
-usernameS=configInfo[0].split("=")[1];
-passwordS=configInfo[1].split("=")[1];
-
-const Octokit = require('@octokit/rest')
-
-const octokit = new Octokit({
- auth: {
-   username: usernameS,
-   password: passwordS,
- }
-})
- 
-// Compare: https://developer.github.com/v3/repos/#list-organization-repositories
-octokit.repos.list().then(({ data }) => {
-  // handle data
-  console.log(data);
-})
 
 module.exports = app => {
   // Your code here
@@ -43,10 +11,22 @@ module.exports = app => {
 
   app.on('push', async context => {
     // Code was pushed to the repo, what should we do with it?
-    app.log(context.github.repos.list().then(({ data }) => {
-  // handle data
-  console.log(data);
-}))
+   // app.log(context.github.repos.list().then(({ data }) => {
+
+  //console.log(data);
+//}))
+  context.log('Code was pushed to the repo, what should we do with it?');
+ 
+  const owner = context.payload.repository.owner.login
+  const repo = context.payload.repository.name
+  context.log(owner);
+  context.log(repo);
+
+  const contentsOfRepo = await context.github.repos.getContents({owner,repo,path: ''});
+  context.log(contentsOfRepo);
+
+  context.github.repos.createOrUpdateFile({owner,repo,path:'botFile.txt',message:'Got your recent push',content:'SSB3aWxsIGJlIGJhYWsgLSBwcm9ib3Q='});
+
   })
 
   // For more information on building apps:
